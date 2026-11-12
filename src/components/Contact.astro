@@ -3,6 +3,10 @@ import { profile } from '../data/profile';
 import { socialIcons } from '../data/social-icons';
 import SectionHead from './SectionHead.astro';
 const icon = (path: string) => `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="${path}" fill="currentColor"/></svg>`;
+// The address is never written into the HTML: it is stored reversed and split, and the
+// script below builds the mailto: link in the browser, so spam scrapers don't pick it up.
+const [user, domain] = profile.email.split('@');
+const rev = (s: string) => [...s].reverse().join('');
 ---
 <section id="contact" class="sheet">
   <SectionHead title="Contact" cmd="cat contact.txt" />
@@ -10,13 +14,21 @@ const icon = (path: string) => `<svg viewBox="0 0 24 24" width="14" height="14" 
     <span class="ok">✓ connection established</span>
     <p class="big">Let’s build something together.</p>
     <div class="chips">
-      <a class="btn chip" href={`mailto:${profile.email}`}><Fragment set:html={icon(socialIcons.email)} />{profile.email}</a>
+      <a class="btn chip" id="email-link" href="#contact" data-u={rev(user)} data-d={rev(domain)}><Fragment set:html={icon(socialIcons.email)} />send email ↗</a>
       <a class="btn chip" href={profile.github} target="_blank" rel="noopener"><Fragment set:html={icon(socialIcons.github)} />github ↗</a>
       <a class="btn chip" href={profile.linkedin} target="_blank" rel="noopener"><Fragment set:html={icon(socialIcons.linkedin)} />linkedin ↗</a>
       <a class="btn chip" href={profile.resume} target="_blank" rel="noopener">résumé.pdf</a>
     </div>
   </div>
 </section>
+
+<script>
+  const a = document.getElementById('email-link');
+  if (a) {
+    const rev = (s = '') => [...s].reverse().join('');
+    a.setAttribute('href', `mailto:${rev(a.dataset.u)}@${rev(a.dataset.d)}`);
+  }
+</script>
 
 <style>
   .box { font-family: var(--mono); display: flex; flex-direction: column; gap: 8px; font-size: var(--s-sm); }

@@ -40,7 +40,7 @@ export const skills: { group: string; items: string[] }[] = [
   { group: 'backend', items: ['node', 'express', 'nest.js'] },
   { group: 'database', items: ['mongodb', 'postgresql', 'mysql'] },
   { group: 'cloud-devops', items: ['aws', 'docker', 'git', 'webpack'] },
-  { group: 'ai', items: ['claude-code', 'codex'] },
+  { group: 'ai-tools', items: ['claude-code', 'codex'] },
 ];
 
 export type Project = {
