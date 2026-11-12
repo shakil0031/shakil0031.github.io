@@ -1,0 +1,109 @@
+---
+import { experience } from '../data/profile';
+import SectionHead from './SectionHead.astro';
+---
+<section id="experience" class="sheet">
+  <SectionHead title="Experience" cmd="git log --career --graph" />
+  <div class="timeline" id="timeline">
+    <span class="track" aria-hidden="true"><span class="fill"></span></span>
+    <ol class="log">
+      {experience.map((job) => (
+        <li class="entry">
+          <span class="dot" aria-hidden="true"></span>
+          <div class="commit">
+            <span class="hash">{job.hash}</span>
+            {job.current && <span class="ref">(<b>HEAD</b> -&gt; current)</span>}
+            <span class="date">{job.period}</span>
+          </div>
+          <h3>{job.title} <span>@ {job.orgUrl ? <a href={job.orgUrl} target="_blank" rel="noopener">{job.org} ↗</a> : job.org}</span></h3>
+          <p class="place">{job.place}</p>
+          <ul>{job.points.map((pt) => <li>{pt}</li>)}</ul>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<script>
+  // Scroll-driven timeline: the line fills down to a point 60% of the way down the screen,
+  // and every dot the line has reached lights up. The last lit dot pulses.
+  const timeline = document.getElementById('timeline');
+  if (timeline) {
+    const track = timeline.querySelector<HTMLElement>('.track')!;
+    const fill = timeline.querySelector<HTMLElement>('.fill')!;
+    const entries = [...timeline.querySelectorAll<HTMLElement>('.entry')];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let start = 0, end = 0, ticking = false;
+
+    const dotCenter = (el: HTMLElement) => el.offsetTop + 13;
+
+    function measure() {
+      start = dotCenter(entries[0]);
+      end = dotCenter(entries[entries.length - 1]);
+      track.style.top = `${start}px`;
+      track.style.height = `${end - start}px`;
+    }
+
+    function update() {
+      ticking = false;
+      const length = end - start;
+      let progress = length;
+      if (!reduced.matches) {
+        const trigger = window.innerHeight * 0.6;
+        progress = Math.min(Math.max(trigger - timeline!.getBoundingClientRect().top - start, 0), length);
+      }
+      fill.style.transform = `scaleY(${length ? progress / length : 1})`;
+
+      let lastLit = -1;
+      entries.forEach((el, i) => {
+        const lit = dotCenter(el) - start <= progress + 1;
+        el.classList.toggle('lit', lit);
+        if (lit) lastLit = i;
+      });
+      entries.forEach((el, i) => el.classList.toggle('latest', i === lastLit));
+    }
+
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    measure();
+    timeline.classList.add('animated');
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => { measure(); update(); });
+    reduced.addEventListener('change', update);
+  }
+</script>
+
+<style>
+  .timeline { position: relative; }
+  .log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 36px; }
+
+  /* track (gray) + fill (accent) */
+  .track { position: absolute; left: 5px; top: 13px; bottom: 13px; width: 2px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .fill { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--accent-fill), var(--accent)); transform-origin: top; transform: scaleY(1); transition: transform 0.12s linear; }
+  /* Without JS the line is fully drawn and every dot is lit, so the page is complete at rest. */
+
+  .entry { position: relative; padding-left: 34px; }
+  .dot {
+    position: absolute; left: 0; top: 7px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent); border: 2px solid var(--accent); z-index: 1;
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  }
+  .animated .dot { background: var(--bg); border-color: var(--line); }
+  .animated .lit .dot { background: var(--accent); border-color: var(--accent); transform: scale(1.15); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .animated .latest .dot::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 50%;
+    border: 2px solid var(--accent); animation: ping 1.8s ease-out infinite;
+  }
+  @keyframes ping { from { transform: scale(1); opacity: 0.7; } to { transform: scale(2.6); opacity: 0; } }
+
+  .commit { font-family: var(--mono); font-size: 0.8125rem; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .hash { color: var(--highlight); }
+  .ref { color: var(--link); }
+  .ref b { color: var(--accent); font-weight: 500; }
+  .date { color: var(--muted); font-variant-numeric: tabular-nums; }
+  h3 { font-size: var(--s-md); font-weight: 600; margin: 6px 0 0; text-wrap: balance; transition: color 0.3s; }
+  h3 span { color: var(--muted); font-weight: 400; }
+  .animated .entry:not(.lit) h3 { color: var(--muted); }
+  .place { margin: 0 0 8px; font-family: var(--mono); font-size: var(--s-xs); color: var(--muted); }
+  ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.9375rem; max-width: 72ch; display: flex; flex-direction: column; gap: 3px; }
+</style>

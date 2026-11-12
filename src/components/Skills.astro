@@ -1,0 +1,32 @@
+---
+import { skills } from '../data/profile';
+import SectionHead from './SectionHead.astro';
+
+// How a skill name is shown on its tag (anything not listed shows as written in profile.ts).
+const display: Record<string, string> = { 'nest.js': 'nestjs', 'claude-code': 'claude code' };
+---
+<section id="skills" class="sheet">
+  <SectionHead title="Skills" cmd="ls ./skills/*" />
+  <div class="cols">
+    {skills.map((s) => (
+      <div class="col">
+        <h3>{s.group}/ <span>{s.items.length}</span></h3>
+        <ul class="chips">
+          {s.items.map((n) => <li class="chip">{display[n] ?? n}</li>)}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .col { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  h3 { margin: 0; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  h3 span { color: var(--muted); font-weight: 400; }
+  .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-family: var(--mono); font-size: 0.8125rem; padding: 4px 10px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); transition: border-color 0.15s, color 0.15s; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 720px) { .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 460px) { .cols { grid-template-columns: 1fr; } }
+</style>

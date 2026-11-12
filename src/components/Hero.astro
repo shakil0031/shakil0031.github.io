@@ -1,0 +1,164 @@
+---
+import { profile } from '../data/profile';
+import { socialIcons } from '../data/social-icons';
+---
+<section id="top" class="sheet" aria-label="Intro">
+  <div>
+    <div class="body" id="hero-body">
+      <div>
+        <p class="cmd"><span class="p">$</span> <span class="c" data-step="type">whoami</span></p>
+        <h1 class="name" data-step="type" data-speed="45">{profile.name}</h1>
+        <p class="role" data-step="show"><span class="gt">&gt;</span> <span id="role-text" data-roles={JSON.stringify(profile.roles)}>{profile.roles[0]}</span><span class="cursor" aria-hidden="true"></span></p>
+        <p class="lead" data-step="show">{profile.lead}</p>
+      </div>
+
+      <div>
+        <p class="cmd"><span class="p">$</span> <span class="c" data-step="type">cat status.txt</span></p>
+        <dl class="status">
+          <div data-step="show"><dt>status</dt><dd class="ok"><span class="live" aria-hidden="true"></span>{profile.status}</dd></div>
+          <div data-step="show"><dt>location</dt><dd>{profile.location}</dd></div>
+        </dl>
+      </div>
+
+      <div class="actions" data-step="show">
+        <a class="btn primary" href="#work">./view-work</a>
+        <a class="btn" href={profile.resume} target="_blank" rel="noopener">./resume.pdf</a>
+        <a class="btn social" href={profile.github} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d={socialIcons.github} fill="currentColor" /></svg>github ↗</a>
+        <a class="btn social" href={profile.linkedin} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d={socialIcons.linkedin} fill="currentColor" /></svg>linkedin ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
+  Typing intro. Runs right after the hero markup so the text is hidden before first paint.
+  Plays once per browser session, never with reduced motion, and any key, click or scroll skips it.
+  Safety net: if anything goes wrong, everything is shown after 4 seconds.
+-->
+<script is:inline>
+  (() => {
+    const body = document.getElementById('hero-body');
+    if (!body) return;
+    let seen = false;
+    try { seen = sessionStorage.getItem('intro-played') === '1'; } catch {}
+    window.__introDone = false;
+    if (seen || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { window.__introDone = true; return; }
+    try { sessionStorage.setItem('intro-played', '1'); } catch {}
+
+    const steps = [...body.querySelectorAll('[data-step]')];
+    const texts = steps.map((el) => (el.dataset.step === 'type' ? el.textContent : null));
+    body.classList.add('intro');
+    steps.forEach((el, i) => { if (texts[i] !== null) el.textContent = ''; });
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      steps.forEach((el, i) => {
+        if (texts[i] !== null) el.textContent = texts[i];
+        el.classList.remove('typing');
+        el.classList.add('shown');
+      });
+      body.classList.remove('intro');
+      window.__introDone = true;
+      window.dispatchEvent(new Event('intro-done'));
+      ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach((e) => window.removeEventListener(e, finish));
+    };
+    ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach((e) => window.addEventListener(e, finish, { passive: true }));
+    setTimeout(finish, 4000);
+
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    (async () => {
+      await wait(250);
+      for (let i = 0; i < steps.length && !done; i++) {
+        const el = steps[i];
+        el.classList.add('shown');
+        if (texts[i] !== null) {
+          el.classList.add('typing');
+          const speed = Number(el.dataset.speed) || 32;
+          for (const ch of texts[i]) {
+            if (done) return;
+            el.textContent += ch;
+            await wait(speed);
+          }
+          el.classList.remove('typing');
+          await wait(140);
+        } else {
+          await wait(110);
+        }
+      }
+      finish();
+    })();
+  })();
+</script>
+
+<script>
+  // Rotating role: types each line from profile.roles, holds it, deletes it, then types the next.
+  // Starts after the intro finishes. With reduced motion it simply stays on the first line.
+  const el = document.getElementById('role-text');
+  const roles: string[] = el ? JSON.parse(el.dataset.roles ?? '[]') : [];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const TYPE_MS = 55, DELETE_MS = 28, HOLD_MS = 2200, GAP_MS = 350;
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  async function rotate() {
+    if (!el || roles.length < 2) return;
+    const line = el.parentElement!;
+    let i = 0;
+    await wait(HOLD_MS);
+    while (true) {
+      line.classList.add('busy');
+      for (let n = el.textContent!.length; n > 0; n--) { el.textContent = el.textContent!.slice(0, -1); await wait(DELETE_MS); }
+      await wait(GAP_MS);
+      i = (i + 1) % roles.length;
+      for (const ch of roles[i]) { el.textContent += ch; await wait(TYPE_MS); }
+      line.classList.remove('busy');
+      await wait(HOLD_MS);
+    }
+  }
+
+  if (!reduced) {
+    if ((window as any).__introDone === false) window.addEventListener('intro-done', rotate, { once: true });
+    else rotate();
+  }
+</script>
+
+<style>
+  .body { font-family: var(--mono); display: flex; flex-direction: column; gap: 26px; }
+  .body .cmd { margin-bottom: 18px; }
+  .name { font-size: clamp(2.6rem, 8vw, 4.75rem); font-weight: 800; line-height: 0.98; letter-spacing: -0.04em; margin: 0; text-wrap: balance; min-height: 0.98em; text-transform: uppercase; }
+  .role { font-size: clamp(1.05rem, 2.6vw, 1.3rem); color: var(--text); margin: 10px 0 0; }
+  .role .gt { color: var(--muted); }
+  .lead { margin: 12px 0 0; font-family: var(--sans); font-size: 1rem; color: var(--muted); max-width: 60ch; }
+  .cursor { display: inline-block; width: 0.55em; height: 1em; background: var(--accent-fill); vertical-align: -0.12em; margin-left: 4px; animation: blink 1.1s steps(1) infinite; }
+  .role.busy .cursor { animation: none; } /* solid cursor while typing, blinking while it rests */
+  @media (max-width: 480px) { .role { min-height: calc(2 * 1.65em); } } /* no layout jump when a line wraps */
+  @keyframes blink { 50% { opacity: 0; } }
+  .status { display: grid; grid-template-columns: auto 1fr; gap: 4px 20px; font-size: 0.875rem; margin: 0; }
+  .status div { display: contents; }
+  .status dt { color: var(--muted); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; align-self: center; }
+  .status dd { margin: 0; }
+  .ok { color: var(--accent); display: inline-flex; align-items: center; gap: 10px; }
+
+  /* "live" status dot: solid center + a ring that keeps rippling outward */
+  .live { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-fill); flex: none; }
+  .live::before, .live::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: var(--accent-fill); animation: live-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .live::after { animation-delay: 1s; }
+  @keyframes live-ping { from { transform: scale(1); opacity: 0.6; } to { transform: scale(3); opacity: 0; } }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .social { display: inline-flex; align-items: center; gap: 8px; }
+
+  /* intro states (only while the intro is playing) */
+  .intro [data-step='show'] { opacity: 0; transform: translateY(4px); transition: opacity 0.25s, transform 0.25s; }
+  .intro .status [data-step='show'] { display: contents; }
+  .intro .status [data-step='show'] > * { opacity: 0; transition: opacity 0.2s; }
+  .intro .status [data-step='show'].shown > * { opacity: 1; }
+  .intro [data-step='show'].shown { opacity: 1; transform: none; }
+  .intro [data-step='type'] { visibility: hidden; }
+  .intro [data-step='type'].shown { visibility: visible; }
+  .typing::after { content: ''; display: inline-block; width: 0.55em; height: 1em; background: var(--accent); vertical-align: -0.12em; margin-left: 2px; }
+</style>

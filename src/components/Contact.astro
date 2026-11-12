@@ -1,0 +1,27 @@
+---
+import { profile } from '../data/profile';
+import { socialIcons } from '../data/social-icons';
+import SectionHead from './SectionHead.astro';
+const icon = (path: string) => `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="${path}" fill="currentColor"/></svg>`;
+---
+<section id="contact" class="sheet">
+  <SectionHead title="Contact" cmd="cat contact.txt" />
+  <div class="box">
+    <span class="ok">✓ connection established</span>
+    <p class="big">Let’s build something together.</p>
+    <div class="chips">
+      <a class="btn chip" href={`mailto:${profile.email}`}><Fragment set:html={icon(socialIcons.email)} />{profile.email}</a>
+      <a class="btn chip" href={profile.github} target="_blank" rel="noopener"><Fragment set:html={icon(socialIcons.github)} />github ↗</a>
+      <a class="btn chip" href={profile.linkedin} target="_blank" rel="noopener"><Fragment set:html={icon(socialIcons.linkedin)} />linkedin ↗</a>
+      <a class="btn chip" href={profile.resume} target="_blank" rel="noopener">résumé.pdf</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .box { font-family: var(--mono); display: flex; flex-direction: column; gap: 8px; font-size: var(--s-sm); }
+  .ok { color: var(--accent); }
+  .big { font-size: clamp(1.3rem, 4vw, 1.9rem); font-weight: 600; letter-spacing: -0.02em; margin: 6px 0 12px; text-wrap: balance; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; font-size: var(--s-xs); overflow-wrap: anywhere; }
+</style>

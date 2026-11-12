@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import TopBar from '../components/TopBar.astro';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import Skills from '../components/Skills.astro';
+import Work from '../components/Work.astro';
+import Experience from '../components/Experience.astro';
+import Contact from '../components/Contact.astro';
+import StatusLine from '../components/StatusLine.astro';
+---
+<Base>
+  <TopBar />
+  <main class="wrap">
+    <Hero />
+    <About />
+    <Skills />
+    <Work />
+    <Experience />
+    <Contact />
+  </main>
+  <StatusLine />
+</Base>
+
+<style>
+  main { display: flex; flex-direction: column; gap: 40px; padding-block: 56px 80px; }
+</style>

@@ -1,0 +1,16 @@
+---
+import { profile } from '../data/profile';
+import SectionHead from './SectionHead.astro';
+---
+<section id="about" class="sheet">
+  <SectionHead title="About" cmd="cat about.md" />
+  <div class="text-block">
+    {profile.about.map((p) => <p class="text" set:html={p} />)}
+  </div>
+</section>
+
+<style>
+  .text { margin: 0 0 14px; max-width: 68ch; color: var(--muted); }
+  .text:last-child { margin-bottom: 0; }
+  .text :global(strong) { color: var(--text); font-weight: 500; }
+</style>

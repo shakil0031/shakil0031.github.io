@@ -1,0 +1,58 @@
+---
+import { projects } from '../data/profile';
+import SectionHead from './SectionHead.astro';
+---
+<section id="work" class="sheet">
+  <SectionHead title="Work" cmd="ls -la ./things-i-built" />
+  <ul class="ls" id="work-list">
+    {projects.map((p, i) => (
+      <li style={`--i:${i}`}>
+        <span class="dash" aria-hidden="true">—</span>
+        <span class="name">{p.link ? <a href={p.link} target="_blank" rel="noopener">{p.slug} ↗</a> : p.slug}</span>
+        <span class="meta">{[...p.tags, p.where.toLowerCase()].join(' · ')}</span>
+        <span class="desc">{p.summary}</span>
+        <span class="impact">↳ {p.impact}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<script>
+  // Rows print in one after another, like `ls` output, when the list scrolls into view.
+  // Only hides rows that start below the screen, so nothing already visible ever blinks out.
+  const list = document.getElementById('work-list');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (list && !reduced && 'IntersectionObserver' in window && list.getBoundingClientRect().top > window.innerHeight) {
+    list.classList.add('pending');
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { list.classList.add('in'); io.disconnect(); }
+    }, { threshold: 0.12 });
+    io.observe(list);
+  }
+</script>
+
+<style>
+  .ls { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  li {
+    display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 4px 14px; align-items: baseline;
+    padding: 14px 4px; border-bottom: 1px solid var(--line); font-family: var(--mono);
+    transition: background-color 0.15s;
+  }
+  li:hover { background: color-mix(in srgb, var(--surface) 70%, transparent); }
+  .dash { color: var(--accent); transition: transform 0.2s; }
+  li:hover .dash { transform: translateX(3px); }
+  .name { font-size: 0.9375rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; overflow-wrap: anywhere; }
+  .name a { color: inherit; }
+  .meta { font-size: 0.75rem; color: var(--muted); text-align: right; white-space: nowrap; }
+  .desc { grid-column: 2; font-family: var(--sans); font-size: 0.875rem; color: var(--muted); }
+  .impact { grid-column: 2 / -1; font-size: 0.75rem; color: var(--accent); }
+
+  /* entrance */
+  .pending li { opacity: 0; transform: translateY(10px); }
+  .pending.in li { opacity: 1; transform: none; transition: opacity 0.4s ease-out, transform 0.4s ease-out, background-color 0.15s; transition-delay: calc(var(--i) * 70ms), calc(var(--i) * 70ms), 0s; }
+
+  @media (max-width: 600px) {
+    li { grid-template-columns: 18px 1fr; }
+    .meta { grid-column: 2; text-align: left; white-space: normal; }
+  }
+</style>

@@ -1,0 +1,18 @@
+---
+/** Section header: big uppercase title on the left, the terminal command on the right. */
+interface Props { title: string; cmd: string }
+const { title, cmd } = Astro.props;
+---
+<div class="head">
+  <h2>{title}</h2>
+  <p class="cmd"><span class="p">$</span> <span class="c" set:html={cmd} /></p>
+</div>
+
+<style>
+  .head {
+    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px 16px;
+    margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
+  }
+  h2 { margin: 0; font-family: var(--mono); font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 800; letter-spacing: -0.01em; text-transform: uppercase; line-height: 1.1; }
+  .cmd { margin: 0; }
+</style>

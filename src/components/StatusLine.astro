@@ -1,0 +1,22 @@
+---
+import { profile } from '../data/profile';
+---
+<footer class="statusline">
+  <div class="wrap row">
+    <span class="mode">NORMAL</span>
+    <span class="br">⎇ main</span>
+    <span class="grow">~/portfolio/index.astro</span>
+    <span class="hide-sm">utf-8</span>
+    <span class="hide-sm">© {new Date().getFullYear()} {profile.name}</span>
+  </div>
+</footer>
+
+<style>
+  .statusline { font-family: var(--mono); font-size: var(--s-xs); background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .row { display: flex; flex-wrap: wrap; align-items: stretch; }
+  span { padding: 8px 12px; color: var(--muted); }
+  .mode { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+  .br { color: var(--text); }
+  .grow { flex: 1; }
+  @media (max-width: 600px) { .hide-sm, .grow { display: none; } }
+</style>

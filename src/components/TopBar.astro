@@ -1,0 +1,149 @@
+---
+import { profile } from '../data/profile';
+const links = ['about', 'skills', 'work', 'experience', 'contact'];
+---
+<header class="bar">
+  <div class="wrap row">
+    <a class="host" href="#top"><i class="dot" aria-hidden="true"></i><b>{profile.handle}@portfolio</b><span>/ ~/whoami</span></a>
+    <div class="right">
+      <nav id="site-nav" aria-label="Sections">
+        {links.map((l, i) => <a href={`#${l}`}><b>{i + 1}:</b>{l}</a>)}
+      </nav>
+      <button id="mode-toggle" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+        <!-- moon: shown in dark mode -->
+        <svg class="moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z" fill="currentColor" />
+        </svg>
+        <!-- sun: shown in light mode -->
+        <svg class="sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" fill="currentColor" />
+          <g stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none">
+            <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M5.3 18.7l1.5-1.5M17.2 6.8l1.5-1.5" />
+          </g>
+        </svg>
+      </button>
+      <!-- burger: phones only -->
+      <button id="menu-toggle" class="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line class="l1" x1="4" y1="7" x2="20" y2="7" />
+            <line class="l2" x1="4" y1="12" x2="20" y2="12" />
+            <line class="l3" x1="4" y1="17" x2="20" y2="17" />
+          </g>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('mode-toggle');
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const current = () => (root.dataset.mode as 'dark' | 'light' | undefined) ?? (media.matches ? 'dark' : 'light');
+
+  function render() {
+    if (!btn) return;
+    const mode = current();
+    btn.dataset.current = mode;
+    const label = `Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`;
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  }
+
+  btn?.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.dataset.mode = next;
+    try { localStorage.setItem('mode', next); } catch {}
+    render();
+  });
+  media.addEventListener('change', render);
+  render();
+
+  // Section links (the burger menu closes when one is tapped).
+  const navLinks = [...document.querySelectorAll<HTMLAnchorElement>('.bar nav a')];
+
+  // Burger menu (phones): opens the nav as a dropdown under the bar.
+  const bar = document.querySelector<HTMLElement>('.bar');
+  const burger = document.getElementById('menu-toggle');
+  const setOpen = (open: boolean) => {
+    bar?.classList.toggle('open', open);
+    burger?.setAttribute('aria-expanded', String(open));
+    burger?.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+  burger?.addEventListener('click', () => setOpen(!bar?.classList.contains('open')));
+  navLinks.forEach((a) => a.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && bar?.classList.contains('open')) { setOpen(false); burger?.focus(); } });
+  document.addEventListener('click', (e) => { if (bar && !bar.contains(e.target as Node)) setOpen(false); });
+  window.matchMedia('(min-width: 641px)').addEventListener('change', (m) => { if (m.matches) setOpen(false); });
+</script>
+
+<style>
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: color-mix(in srgb, var(--bg) 90%, transparent); border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    font-family: var(--mono); font-size: var(--s-xs);
+  }
+  :global(body)::before {
+    content: ''; position: fixed; inset: 0 0 auto; z-index: 10;
+    height: env(safe-area-inset-top, 0px); background: var(--surface);
+  }
+  .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; padding-block: 10px; }
+  .right { display: flex; align-items: center; gap: 8px 18px; margin-left: auto; }
+  .host { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+  .host:hover { text-decoration: none; }
+  .host b { color: var(--text); font-weight: 400; }
+  .host .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-fill); }
+  @media (max-width: 420px) { .host span { display: none; } }
+  nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  nav a { color: var(--muted); transition: color 0.2s; }
+  nav a:hover { color: var(--text); text-decoration: none; }
+  nav b { color: var(--highlight); font-weight: 500; transition: color 0.2s; }
+
+  button {
+    width: 30px; height: 30px; padding: 0; flex: none;
+    display: grid; place-items: center;
+    color: var(--accent); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+    transition: border-color 0.15s, transform 0.2s;
+  }
+  button:hover { border-color: var(--accent); }
+  button:active { transform: scale(0.92); }
+  button svg { grid-area: 1 / 1; transition: opacity 0.2s, transform 0.3s; }
+
+  /* Icon follows the current mode (works before JS runs, too). */
+  .sun { opacity: 1; }
+  .moon { opacity: 0; transform: rotate(-60deg) scale(0.6); }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-mode='light'])) .sun { opacity: 0; transform: rotate(60deg) scale(0.6); }
+    :global(:root:not([data-mode='light'])) .moon { opacity: 1; transform: none; }
+  }
+  :global(:root[data-mode='dark']) .sun { opacity: 0; transform: rotate(60deg) scale(0.6); }
+  :global(:root[data-mode='dark']) .moon { opacity: 1; transform: none; }
+
+  /* burger icon: three lines that turn into an X */
+  .burger { display: none; }
+  .burger line { transition: transform 0.25s, opacity 0.2s; transform-origin: 12px 12px; }
+  .open .burger { border-color: var(--accent); }
+  .open .burger .l1 { transform: translateY(5px) rotate(45deg); }
+  .open .burger .l2 { opacity: 0; }
+  .open .burger .l3 { transform: translateY(-5px) rotate(-45deg); }
+
+  @media (max-width: 640px) {
+    .row { flex-wrap: nowrap; }
+    .right { gap: 8px; }
+    .burger { display: grid; }
+    nav {
+      position: absolute; top: 100%; left: 0; right: 0;
+      flex-direction: column; gap: 2px;
+      background: var(--surface); border-bottom: 1px solid var(--line);
+      padding: 8px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px));
+      box-shadow: 0 12px 24px -12px rgb(0 0 0 / 0.35);
+      visibility: hidden; opacity: 0; transform: translateY(-6px);
+      transition: opacity 0.2s, transform 0.2s, visibility 0s 0.2s;
+    }
+    .open nav { visibility: visible; opacity: 1; transform: none; transition: opacity 0.2s, transform 0.2s; }
+    nav a { padding: 11px 10px; font-size: var(--s-sm); }
+  }
+</style>
