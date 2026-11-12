@@ -19,7 +19,7 @@ export const profile = {
   careerStart: 2018, // first year in the industry (not shown on the page right now)
   location: 'Dhaka, BD · working remote',
   // One short sentence shown under the rotating role in the hero.
-  lead: 'Full-stack developer from Bangladesh with 8+ years of building scalable web apps. Fueled by new tech and good coffee. ☕',
+  lead: 'Full-stack developer from Bangladesh with 7+ years of building scalable web apps. Fueled by new tech and good coffee. ☕',
   status: 'open to new opportunities',
 
   email: 'shakilme0031@gmail.com',
