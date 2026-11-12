@@ -5,7 +5,7 @@
 export const profile = {
   name: 'Shakil Ahmed',
   handle: 'shakil',
-  role: 'Senior Software Engineer',
+  role: 'Senior Full Stack Developer',
   // Lines that type out one after another after the ">" in the hero. The first one is what
   // search engines, link previews and screen readers see, so keep your title first.
   roles: [
