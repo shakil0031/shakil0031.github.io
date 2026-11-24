@@ -35,11 +35,13 @@ export const profile = {
 };
 
 export const skills: { group: string; items: string[] }[] = [
-  { group: 'languages', items: ['javascript', 'typescript', 'python', 'c'] },
-  { group: 'frontend', items: ['react', 'next.js', 'three.js', 'tailwind'] },
+  { group: 'languages', items: ['javascript', 'typescript', 'html5', 'css3', 'python', 'c'] },
+  { group: 'frontend', items: ['react', 'next.js', 'tailwind', 'material-ui', 'sass', 'three.js', 'shadcn/ui'] },
+  { group: 'state-data', items: ['zustand', 'react-query', 'swr', 'rest-apis'] },
   { group: 'backend', items: ['node', 'express', 'nest.js'] },
   { group: 'database', items: ['mongodb', 'postgresql', 'mysql'] },
-  { group: 'cloud-devops', items: ['aws', 'docker', 'git', 'webpack'] },
+  { group: 'devops-tools', items: ['git', 'docker', 'ci/cd', 'aws', 'sendgrid'] },
+  { group: 'testing', items: ['jest', 'react-testing-library'] },
   { group: 'ai-tools', items: ['claude-code', 'codex'] },
 ];
 
